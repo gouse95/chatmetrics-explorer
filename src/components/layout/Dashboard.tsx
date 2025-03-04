@@ -8,10 +8,21 @@ import { PieChart } from "@/components/metrics/PieChart";
 import { APP_NAMES, MODEL_NAMES, USER_NAMES, fetchMetrics } from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { BarChart as BarChartIcon, PieChart as PieChartIcon, 
-         LineChart as LineChartIcon, Table as TableIcon,
-         Zap, Users, MessageSquare, Coins } from "lucide-react";
+import { 
+  BarChart as BarChartIcon, 
+  PieChart as PieChartIcon, 
+  LineChart as LineChartIcon, 
+  Table as TableIcon,
+  Zap, 
+  Users, 
+  MessageSquare, 
+  Coins,
+  Check,
+  Info,
+  AlertTriangle 
+} from "lucide-react";
 import { toast } from "sonner";
+import { Logo } from "@/assets/logo";
 
 export function Dashboard() {
   // State for filters
@@ -21,14 +32,16 @@ export function Dashboard() {
     modelName?: string;
   }>({});
 
+  // Debug logs for component lifecycle
   useEffect(() => {
-    console.log("Dashboard mounted");
+    console.log("🚀 Dashboard mounted | Initializing metrics explorer");
     toast("Dashboard loaded successfully", {
       description: "Welcome to Chat Metrics Explorer",
+      icon: <Check className="h-4 w-4 text-green-500" />,
     });
     
     return () => {
-      console.log("Dashboard unmounted");
+      console.log("💤 Dashboard unmounted | Cleaning up resources");
     };
   }, []);
 
@@ -38,12 +51,13 @@ export function Dashboard() {
     appId?: string;
     modelName?: string;
   }) => {
-    console.log("Filters changed:", newFilters);
+    console.log("🔍 Filters changed:", newFilters);
     setFilters(newFilters);
     
     if (Object.values(newFilters).some(value => value)) {
       toast("Filters applied", {
         description: "Loading filtered data...",
+        icon: <Info className="h-4 w-4 text-blue-500" />,
       });
     } else {
       toast("Filters cleared", {
@@ -55,48 +69,48 @@ export function Dashboard() {
   // Fetch main metrics data
   const { data: platformData, isLoading: isPlatformLoading } = useQuery({
     queryKey: ["platform_chat_details"],
-    queryFn: () => fetchMetrics("platform_chat_details"),
-    onSuccess: (data) => {
-      console.log("Platform data loaded:", data);
+    queryFn: () => {
+      console.log("📊 Fetching platform data");
+      return fetchMetrics("platform_chat_details");
     },
     onError: (error) => {
-      console.error("Error loading platform data:", error);
+      console.error("❌ Error loading platform data:", error);
       toast.error("Failed to load platform metrics");
     }
   });
 
   const { data: additionalData, isLoading: isAdditionalLoading } = useQuery({
     queryKey: ["additional_chat_details"],
-    queryFn: () => fetchMetrics("additional_chat_details"),
-    onSuccess: (data) => {
-      console.log("Additional data loaded:", data);
+    queryFn: () => {
+      console.log("📊 Fetching additional data");
+      return fetchMetrics("additional_chat_details");
     },
     onError: (error) => {
-      console.error("Error loading additional data:", error);
+      console.error("❌ Error loading additional data:", error);
       toast.error("Failed to load additional metrics");
     }
   });
 
   const { data: advancedData, isLoading: isAdvancedLoading } = useQuery({
     queryKey: ["advanced_chat_details"],
-    queryFn: () => fetchMetrics("advanced_chat_details"),
-    onSuccess: (data) => {
-      console.log("Advanced data loaded:", data);
+    queryFn: () => {
+      console.log("📊 Fetching advanced data");
+      return fetchMetrics("advanced_chat_details");
     },
     onError: (error) => {
-      console.error("Error loading advanced data:", error);
+      console.error("❌ Error loading advanced data:", error);
       toast.error("Failed to load advanced metrics");
     }
   });
 
   const { data: analysisData, isLoading: isAnalysisLoading } = useQuery({
     queryKey: ["platform_chat_analysis"],
-    queryFn: () => fetchMetrics("platform_chat_analysis"),
-    onSuccess: (data) => {
-      console.log("Analysis data loaded:", data);
+    queryFn: () => {
+      console.log("📊 Fetching analysis data");
+      return fetchMetrics("platform_chat_analysis");
     },
     onError: (error) => {
-      console.error("Error loading analysis data:", error);
+      console.error("❌ Error loading analysis data:", error);
       toast.error("Failed to load analysis metrics");
     }
   });
@@ -104,21 +118,56 @@ export function Dashboard() {
   // Fetch filtered data
   const { data: filteredData, isLoading: isFilteredLoading } = useQuery({
     queryKey: ["conversation_details", filters],
-    queryFn: () =>
-      fetchMetrics("fetch_conversation_details", {
+    queryFn: () => {
+      console.log("📊 Fetching filtered data with:", filters);
+      return fetchMetrics("fetch_conversation_details", {
         filters: {
           user_id: filters.userId,
           app_id: filters.appId,
           model_name: filters.modelName,
         },
         batch_size: 1000,
-      }),
+      });
+    },
     enabled: Boolean(filters.userId || filters.appId || filters.modelName),
-    onSuccess: (data) => {
-      console.log("Filtered data loaded:", data);
-      
+    onError: (error) => {
+      console.error("❌ Error loading filtered data:", error);
+      toast.error("Failed to load filtered conversations");
+    }
+  });
+
+  // Log data loading state
+  useEffect(() => {
+    if (!isPlatformLoading && platformData) {
+      console.log("✅ Platform data loaded successfully");
+    }
+    if (!isAdditionalLoading && additionalData) {
+      console.log("✅ Additional data loaded successfully");
+    }
+    if (!isAdvancedLoading && advancedData) {
+      console.log("✅ Advanced data loaded successfully");
+    }
+    if (!isAnalysisLoading && analysisData) {
+      console.log("✅ Analysis data loaded successfully");
+    }
+  }, [
+    isPlatformLoading, 
+    isAdditionalLoading, 
+    isAdvancedLoading, 
+    isAnalysisLoading, 
+    platformData, 
+    additionalData, 
+    advancedData, 
+    analysisData
+  ]);
+
+  // Effect for handling filtered data
+  useEffect(() => {
+    if (filteredData?.result) {
       // Count the number of conversations
-      const conversationCount = data?.result ? Object.keys(data.result).length : 0;
+      const conversationCount = filteredData?.result ? Object.keys(filteredData.result).length : 0;
+      console.log(`🔍 Found ${conversationCount} conversations in filtered data`);
+      
       if (conversationCount > 0) {
         toast.success(`Found ${conversationCount} conversations`, {
           description: "Filtered data loaded successfully",
@@ -126,14 +175,11 @@ export function Dashboard() {
       } else if (conversationCount === 0 && (filters.userId || filters.appId || filters.modelName)) {
         toast.info("No conversations found with current filters", {
           description: "Try adjusting your filters",
+          icon: <AlertTriangle className="h-4 w-4 text-amber-500" />,
         });
       }
-    },
-    onError: (error) => {
-      console.error("Error loading filtered data:", error);
-      toast.error("Failed to load filtered conversations");
     }
-  });
+  }, [filteredData, filters]);
 
   // Prepare data for visualizations
   const platformResult = platformData?.result || {};
@@ -202,16 +248,21 @@ export function Dashboard() {
         }
       }
     } else {
-      console.error("filteredData.result is not an object:", resultObj);
+      console.error("❌ filteredData.result is not an object:", resultObj);
     }
   }
 
   return (
     <div className="container py-8 animate-fade-in bg-gradient-to-br from-background to-muted/20">
       <header className="mb-10">
-        <h1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Chat Metrics Explorer</h1>
+        <div className="flex items-center gap-3 mb-3">
+          <Logo className="h-10 w-auto" />
+          <h1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-[#0F83A0] to-[#F79138] bg-clip-text text-transparent">
+            Chat Metrics Explorer
+          </h1>
+        </div>
         <p className="mt-2 text-muted-foreground">
-          Analyzing AI chat metrics and performance insights
+          Advanced analytics and performance insights for AI conversations
         </p>
       </header>
 
@@ -220,7 +271,7 @@ export function Dashboard() {
         appId={filters.appId}
         modelName={filters.modelName}
         onFilterChange={handleFilterChange}
-        className="mb-8 glass-card"
+        className="mb-8 glass-card shadow-lg"
       />
 
       {/* KPI Cards */}
@@ -229,30 +280,30 @@ export function Dashboard() {
           <MetricCard
             title="Total Users"
             value={platformResult.total_users || 0}
-            icon={<Users className="h-4 w-4" />}
+            icon={<Users className="h-5 w-5 text-blue-600" />}
             isLoading={isPlatformLoading}
-            className="border-l-4 border-blue-500"
+            className="border-l-4 border-blue-500 hover:translate-y-[-4px] transition-all duration-300"
           />
           <MetricCard
             title="Total Conversations"
             value={platformResult.total_conversations || 0}
-            icon={<MessageSquare className="h-4 w-4" />}
+            icon={<MessageSquare className="h-5 w-5 text-green-600" />}
             isLoading={isPlatformLoading}
-            className="border-l-4 border-green-500"
+            className="border-l-4 border-green-500 hover:translate-y-[-4px] transition-all duration-300"
           />
           <MetricCard
             title="Total Messages"
             value={platformResult.total_messages || 0}
-            icon={<PieChartIcon className="h-4 w-4" />}
+            icon={<PieChartIcon className="h-5 w-5 text-purple-600" />}
             isLoading={isPlatformLoading}
-            className="border-l-4 border-purple-500"
+            className="border-l-4 border-purple-500 hover:translate-y-[-4px] transition-all duration-300"
           />
           <MetricCard
             title="Total Tokens"
             value={analysisResult.total_tokens?.toLocaleString() || 0}
-            icon={<Coins className="h-4 w-4" />}
+            icon={<Coins className="h-5 w-5 text-amber-600" />}
             isLoading={isAnalysisLoading}
-            className="border-l-4 border-amber-500"
+            className="border-l-4 border-amber-500 hover:translate-y-[-4px] transition-all duration-300"
           />
         </div>
       </section>
@@ -296,19 +347,19 @@ export function Dashboard() {
             title="Avg. Messages per Conversation"
             value={additionalResult.average_messages_per_conversation?.toFixed(1) || 0}
             isLoading={isAdditionalLoading}
-            className="bg-gradient-to-br from-white/80 to-white/60"
+            className="bg-gradient-to-br from-white/90 to-white/70 shadow-sm hover:shadow-md transition-all duration-300"
           />
           <MetricCard
             title="Avg. Tokens per Request"
             value={analysisResult.average_tokens_per_request?.toFixed(1) || 0}
             isLoading={isAnalysisLoading}
-            className="bg-gradient-to-br from-white/80 to-white/60"
+            className="bg-gradient-to-br from-white/90 to-white/70 shadow-sm hover:shadow-md transition-all duration-300"
           />
           <MetricCard
             title="Avg. Execution Time (s)"
             value={analysisResult.average_execution_time?.toFixed(2) || 0}
             isLoading={isAnalysisLoading}
-            className="bg-gradient-to-br from-white/80 to-white/60"
+            className="bg-gradient-to-br from-white/90 to-white/70 shadow-sm hover:shadow-md transition-all duration-300"
           />
         </div>
       </section>
@@ -332,6 +383,12 @@ export function Dashboard() {
           />
         </section>
       )}
+      
+      {/* Footer with attribution */}
+      <footer className="mt-16 text-center text-sm text-muted-foreground p-4 border-t">
+        <p>AI Chat Metrics Explorer v1.0 — © {new Date().getFullYear()}</p>
+        <p className="mt-1">Providing insights for modern AI communication platforms</p>
+      </footer>
     </div>
   );
 }
