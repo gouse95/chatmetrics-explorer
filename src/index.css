@@ -111,3 +111,53 @@
 .staggered-fade > *:nth-child(4) { animation-delay: 0.25s; }
 .staggered-fade > *:nth-child(5) { animation-delay: 0.3s; }
 .staggered-fade > *:nth-child(6) { animation-delay: 0.35s; }
+
+/* Additional animation and style enhancements */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.bg-mesh-gradient {
+  background-image: 
+    radial-gradient(at 21% 33%, hsla(225, 100%, 95%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 79% 76%, hsla(218, 100%, 96%, 0.1) 0px, transparent 50%);
+}
+
+.text-shadow {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card-highlight {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-highlight::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  transition: transform 0.5s ease;
+}
+
+.card-highlight:hover::after {
+  transform: rotate(30deg) translate(50%, 50%);
+}

@@ -27,7 +27,7 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "glass-card relative overflow-hidden rounded-xl p-6 animate-scale-in",
+        "glass-card relative overflow-hidden rounded-xl p-6 animate-scale-in transition-all hover:shadow-md hover:translate-y-[-2px]",
         className
       )}
     >
@@ -46,7 +46,7 @@ export function MetricCard({
             {icon && <div className="text-muted-foreground">{icon}</div>}
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <h2 className="text-3xl font-semibold tracking-tight">{value}</h2>
+            <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">{value}</h2>
             {trend && (
               <span
                 className={cn(
@@ -61,6 +61,7 @@ export function MetricCard({
           {description && (
             <p className="mt-1 text-xs text-muted-foreground">{description}</p>
           )}
+          <div className="absolute bottom-0 right-0 h-16 w-16 rounded-tl-full bg-gradient-to-br from-primary/5 to-primary/10"></div>
         </>
       )}
     </div>
